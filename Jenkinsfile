@@ -40,7 +40,7 @@ pipeline {
     post {
         always {
             script {
-                if (fileExists('target/surefire-reports')) {
+                if (env.WORKSPACE && fileExists('target/surefire-reports')) {
                     junit 'target/surefire-reports/*.xml'
                 }
             }
