@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'chmod +x mvnw'
-                sh './mvnw -B package'
+                sh './mvnw -B -DskipTests package'
             }
         }
 
@@ -23,7 +23,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh './mvnw test'
+                sh './mvnw -B test'
             }
         }
     }
@@ -31,7 +31,11 @@ pipeline {
     post {
         always {
             script {
-                if (env.WORKSPACE && fileExists('target/surefire-reports')) {
+                def hasReports = sh(
+                    script: 'ls -1 target/surefire-reports/*.xml >/dev/null 2>&1',
+                    returnStatus: true
+                ) == 0
+                if (hasReports) {
                     junit 'target/surefire-reports/*.xml'
                 }
             }
