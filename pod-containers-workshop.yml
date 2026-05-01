@@ -3,9 +3,21 @@ kind: Pod
 metadata:
   name: devops-workshop
 spec:
+  securityContext:
+    fsGroup: 1000
+  initContainers:
+    - name: init-chown-jenkins
+      image: busybox
+      command: ["sh", "-c", "chown -R 1000:1000 /var/jenkins_home || true"]
+      volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
   containers:
     - name: jenkins
       image: jenkins/jenkins:lts
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
       ports:
         - containerPort: 8080
       volumeMounts:
@@ -26,4 +38,6 @@ spec:
 
   volumes:
     - name: jenkins-home
-      emptyDir: {}
+      hostPath:
+        path: /var/jenkins_home
+        type: DirectoryOrCreate

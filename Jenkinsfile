@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        kubernetes {
-            defaultContainer 'maven'
-        }
-    }
+    agent any
 
     stages {
         stage('Checkout') {
@@ -14,25 +10,20 @@ pipeline {
 
         stage('Build') {
             steps {
-                container('maven') {
-                    sh 'mvn -B package'
-                }
+                sh 'chmod +x mvnw'
+                sh './mvnw -B package'
             }
         }
 
         stage('Docker Build') {
             steps {
-                container('docker') {
-                    sh 'docker build -t mi-app:latest .'
-                }
+                sh 'docker build -t mi-app:latest .'
             }
         }
 
         stage('Test') {
             steps {
-                container('maven') {
-                    sh 'mvn test'
-                }
+                sh './mvnw test'
             }
         }
     }
@@ -44,7 +35,7 @@ pipeline {
                     junit 'target/surefire-reports/*.xml'
                 }
             }
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
         }
     }
 }
