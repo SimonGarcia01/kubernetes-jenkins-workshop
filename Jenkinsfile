@@ -8,10 +8,16 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Test') {
             steps {
                 sh 'chmod +x mvnw'
-                sh './mvnw -B -DskipTests package'
+                sh './mvnw -B clean package'
+            }
+        }
+
+        stage('Static Analysis (SonarQube)') {
+            steps {
+                sh './mvnw -B sonar:sonar -Dsonar.projectKey=my-app -Dsonar.host.url=http://sonarqube:9000'
             }
         }
 
@@ -22,9 +28,16 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Container Security Scan (Trivy)') {
             steps {
-                sh './mvnw -B test'
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.50.2 image mi-app:latest'
+            }
+        }
+
+        stage('Deploy') {
+            when { branch 'main' }
+            steps {
+                sh 'docker run -d -p 8080:8080 mi-app:latest'
             }
         }
     }
@@ -41,6 +54,14 @@ pipeline {
                 }
             }
             archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
+            echo 'Limpiando entorno...'
+            script {
+                try {
+                    cleanWs()
+                } catch (err) {
+                    echo 'cleanWs no esta disponible'
+                }
+            }
         }
     }
 }
