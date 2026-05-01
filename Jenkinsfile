@@ -17,6 +17,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
+                sh 'for i in $(seq 1 20); do docker version && break || sleep 2; done'
                 sh 'docker build -t mi-app:latest .'
             }
         }
