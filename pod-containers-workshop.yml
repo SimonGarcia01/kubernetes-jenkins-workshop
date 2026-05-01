@@ -12,6 +12,18 @@ spec:
         - name: jenkins-home
           mountPath: /var/jenkins_home
 
+    - name: maven
+      image: maven:3.9.9-eclipse-temurin-17
+      command: ["cat"]
+      tty: true
+
+    - name: docker
+      image: docker:24-dind
+      securityContext:
+        privileged: true
+      command: ["dockerd-entrypoint.sh"]
+      args: []
+
   volumes:
     - name: jenkins-home
       emptyDir: {}

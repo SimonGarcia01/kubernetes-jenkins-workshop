@@ -1,32 +1,49 @@
-#!/usr/bin/env groovy
-
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            defaultContainer 'maven'
+        }
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+
         stage('Build') {
             steps {
-                sh 'mvn -B package'
+                container('maven') {
+                    sh 'mvn -B package'
+                }
             }
         }
+
         stage('Docker Build') {
             steps {
-                sh 'docker build -t mi-app:latest .'
+                container('docker') {
+                    sh 'docker build -t mi-app:latest .'
+                }
             }
         }
+
         stage('Test') {
             steps {
-                sh 'mvn test'
+                container('maven') {
+                    sh 'mvn test'
+                }
             }
         }
     }
+
     post {
         always {
-            junit 'target/surefire-reports/*.xml'
+            script {
+                if (fileExists('target/surefire-reports')) {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
             archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
         }
     }
