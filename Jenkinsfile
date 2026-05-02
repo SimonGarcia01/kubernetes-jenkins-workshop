@@ -44,7 +44,7 @@ pipeline {
             when { branch 'main' }
             steps {
                 sh 'docker rm -f mi-app || true'
-                sh 'docker run -d --name mi-app -p 8080:8080 mi-app:latest'
+                sh 'docker run -d --name mi-app -p 8081:8080 mi-app:latest'
             }
         }
     }
