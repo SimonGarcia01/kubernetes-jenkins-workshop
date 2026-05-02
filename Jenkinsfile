@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    environment {
+        SONAR_HOST_URL = 'http://sonarqube:9000'
+        SONAR_PROJECT_KEY = 'my-app'
+    }
 
     stages {
         stage('Checkout') {
@@ -17,7 +21,10 @@ pipeline {
 
         stage('Static Analysis (SonarQube)') {
             steps {
-                sh './mvnw -B sonar:sonar -Dsonar.projectKey=my-app -Dsonar.host.url=http://sonarqube:9000'
+                script {
+                    def loginArg = env.SONAR_TOKEN ? "-Dsonar.login=${env.SONAR_TOKEN}" : ''
+                    sh "./mvnw -B sonar:sonar -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.host.url=${env.SONAR_HOST_URL} ${loginArg}"
+                }
             }
         }
 
