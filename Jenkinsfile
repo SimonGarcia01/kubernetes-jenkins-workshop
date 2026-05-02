@@ -3,6 +3,7 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'http://sonarqube:9000'
         SONAR_PROJECT_KEY = 'my-app'
+        TRIVY_VERSION = '0.50.2'
     }
 
     stages {
@@ -22,7 +23,7 @@ pipeline {
         stage('Static Analysis (SonarQube)') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh './mvnw -B sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                    sh './mvnw -B sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300'
                 }
             }
         }
@@ -36,7 +37,15 @@ pipeline {
 
         stage('Container Security Scan (Trivy)') {
             steps {
-                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.50.2 image mi-app:latest'
+                                sh '''
+TRIVY_DIR=.trivy
+mkdir -p "$TRIVY_DIR"
+if [ ! -x "$TRIVY_DIR/trivy" ]; then
+    curl -sSfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -o /tmp/trivy.tgz
+    tar -xzf /tmp/trivy.tgz -C "$TRIVY_DIR" trivy
+fi
+"$TRIVY_DIR/trivy" image --exit-code 1 --severity CRITICAL --no-progress mi-app:latest
+'''
             }
         }
 
@@ -44,7 +53,7 @@ pipeline {
             when { branch 'main' }
             steps {
                 sh 'docker rm -f mi-app || true'
-                sh 'docker run -d --name mi-app -p 8081:8080 mi-app:latest'
+                sh 'docker run -d --name mi-app -p 80:80 -e SERVER_PORT=80 mi-app:latest'
             }
         }
     }
