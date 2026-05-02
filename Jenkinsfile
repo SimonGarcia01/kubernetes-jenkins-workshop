@@ -21,9 +21,8 @@ pipeline {
 
         stage('Static Analysis (SonarQube)') {
             steps {
-                script {
-                    def loginArg = env.SONAR_TOKEN ? "-Dsonar.login=${env.SONAR_TOKEN}" : ''
-                    sh "./mvnw -B sonar:sonar -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.host.url=${env.SONAR_HOST_URL} ${loginArg}"
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh './mvnw -B sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
                 }
             }
         }
