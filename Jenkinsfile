@@ -3,7 +3,6 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'http://sonarqube:9000'
         SONAR_PROJECT_KEY = 'my-app'
-        TRIVY_VERSION = '0.50.2'
     }
 
     stages {
@@ -41,8 +40,7 @@ pipeline {
 TRIVY_DIR=.trivy
 mkdir -p "$TRIVY_DIR"
 if [ ! -x "$TRIVY_DIR/trivy" ]; then
-    curl -sSfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -o /tmp/trivy.tgz
-    tar -xzf /tmp/trivy.tgz -C "$TRIVY_DIR" trivy
+    curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" | sh -s -- -b "$TRIVY_DIR"
 fi
 "$TRIVY_DIR/trivy" image --exit-code 1 --severity CRITICAL --no-progress mi-app:latest
 '''
