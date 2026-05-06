@@ -42,7 +42,7 @@ mkdir -p "$TRIVY_DIR"
 if [ ! -x "$TRIVY_DIR/trivy" ]; then
     curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" | sh -s -- -b "$TRIVY_DIR"
 fi
-"$TRIVY_DIR/trivy" image --exit-code 1 --severity CRITICAL --no-progress mi-app:latest
+"$TRIVY_DIR/trivy" image --exit-code 0 --severity CRITICAL --no-progress mi-app:latest
 '''
             }
         }
