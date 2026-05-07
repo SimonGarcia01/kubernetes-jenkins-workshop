@@ -2,6 +2,12 @@
 
 This project aims to be the basic skeleton to apply continuous integration and continuous delivery.
 
+
+## Source code
+You can clone or fork the code repo in the following link: 
+https://github.com/SimonGarcia01/kubernetes-jenkins-workshop.git
+
+
 ## Topology
 
 CICD Demo uses some kubernetes primitives to deploy:
@@ -134,5 +140,5 @@ Using Docker:
 - If you are running locally, make sure the `$APP_URL` is populated and points to a valid instance of your application. This variable is populated automatically in Jenkins.
 
 ```bash
-APP_URL=http://dev-cicd-demo-master.anzcd.internal/ make systemTest
+APP_URL=http://dev-cicd-demo-master.anzcd.internal/ make systemTesthttps://github.com/SimonGarcia01/kubernetes-jenkins-workshop.git
 ```
